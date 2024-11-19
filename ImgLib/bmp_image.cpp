@@ -11,7 +11,10 @@ using namespace std;
 namespace img_lib {
     // функция вычисления отступа по ширине
     static int GetBMPStride(int w) {
-        return 4 * ((w * 3 + 3) / 4);
+        const uint8_t PIXEL_SIZE = 3;
+        const uint8_t BLOCK_SIZE = 4;
+        const uint8_t STRIDE_SIZE = 4;
+        return STRIDE_SIZE * ((w * PIXEL_SIZE + PIXEL_SIZE) / BLOCK_SIZE);
     }
 
     PACKED_STRUCT_BEGIN BitmapFileHeader{
@@ -89,10 +92,12 @@ namespace img_lib {
         // Читает заголовки
         BitmapFileHeader file_header(0, 0);
         BitmapInfoHeader info_header(0, 0);
-        in.read(reinterpret_cast<char*>(&file_header), sizeof(file_header));
-        in.read(reinterpret_cast<char*>(&info_header), sizeof(info_header));
+        if (!in.read(reinterpret_cast<char*>(&file_header), sizeof(file_header))) return {};
+        if (in.read(reinterpret_cast<char*>(&info_header), sizeof(info_header))) return {};
 
-        if (info_header.biBitCount != 24 || info_header.biCompression != 0) {
+
+
+        if (file_header.bfType != "BM" or info_header.biBitCount != 24 or info_header.biCompression != 0) {
             return {};
         }
 
