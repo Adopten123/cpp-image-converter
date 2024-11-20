@@ -93,7 +93,7 @@ namespace img_lib {
         BitmapFileHeader file_header(0, 0);
         BitmapInfoHeader info_header(0, 0);
         if (!in.read(reinterpret_cast<char*>(&file_header), sizeof(file_header))) return {};
-        if (in.read(reinterpret_cast<char*>(&info_header), sizeof(info_header))) return {};
+        if (!in.read(reinterpret_cast<char*>(&info_header), sizeof(info_header))) return {};
 
 
 
@@ -112,6 +112,11 @@ namespace img_lib {
         for (int y = height - 1; y >= 0; --y) {
             Color* line = result.GetLine(y);
             in.read(buffer.data(), stride);
+
+            if (!in) { 
+                return {};
+            }
+
             for (int x = 0; x < width; ++x) {
                 line[x].b = static_cast<std::byte>(buffer[x * 3 + 0]);
                 line[x].g = static_cast<std::byte>(buffer[x * 3 + 1]);
